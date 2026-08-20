@@ -88,7 +88,7 @@ function navigate(route, pushState = true) {
   };
   (renderers[route] || renderDashboard)();
   updateNavState(route);
-  document.getElementById('main-canvas').scrollTop = 0;
+  window.scrollTo({ top: 0, left: 0 });
 }
 
 function updateNavState(route) {
