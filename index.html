@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Prospera – Smart Inventory Dashboard</title>
+  <meta name="description" content="Prospera Enterprise Analytics – AI-powered inventory, revenue, and customer intelligence platform."/>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "on-error-container": "#93000a", "on-surface": "#191c1d", "surface-dim": "#d9dadb",
+            "surface": "#FFFFFF", "on-primary-container": "#dad7ff", "tertiary": "#414855",
+            "on-primary": "#ffffff", "on-secondary": "#ffffff", "error-container": "#ffdad6",
+            "secondary-fixed": "#dce2f7", "surface-container-highest": "#e1e3e4",
+            "surface-variant": "#e1e3e4", "secondary-container": "#d9dff5",
+            "surface-container": "#edeeef", "primary-fixed": "#e2dfff", "outline": "#777587",
+            "surface-container-low": "#f3f4f5", "inverse-on-surface": "#f0f1f2",
+            "primary-container": "#4f46e5", "warning": "#F59E0B", "inverse-surface": "#2e3132",
+            "outline-variant": "#c7c4d8", "inverse-primary": "#c3c0ff", "error": "#EF4444",
+            "tertiary-container": "#59606e", "surface-container-lowest": "#ffffff",
+            "on-background": "#191c1d", "success": "#10B981", "surface-bright": "#f8f9fa",
+            "on-error": "#ffffff", "primary": "#3525cd", "surface-tint": "#4d44e3",
+            "secondary": "#575e70", "surface-container-high": "#e7e8e9", "on-tertiary": "#ffffff",
+            "on-secondary-container": "#5c6274", "background": "#f8f9fa", "on-surface-variant": "#464555",
+            "on-tertiary-container": "#d4dbeb"
+          },
+          borderRadius: { "DEFAULT":"0.5rem","lg":"0.75rem","xl":"1rem","2xl":"1.5rem","full":"9999px" },
+          spacing: { "stack-sm":"8px","stack-md":"16px","stack-lg":"24px","gutter":"24px","nav-width":"240px","drawer-width":"400px","margin-page":"32px" },
+          fontFamily: { "sans":["Inter","sans-serif"] },
+          fontSize: {
+            "label-md": ["12px",{lineHeight:"16px",letterSpacing:"0.01em",fontWeight:"500"}],
+            "label-caps":["11px",{lineHeight:"16px",letterSpacing:"0.05em",fontWeight:"700"}],
+            "body-sm":  ["14px",{lineHeight:"20px",fontWeight:"400"}],
+            "body-base":["16px",{lineHeight:"24px",fontWeight:"400"}],
+            "title-lg": ["18px",{lineHeight:"28px",fontWeight:"600"}],
+            "headline-md":["24px",{lineHeight:"32px",letterSpacing:"-0.01em",fontWeight:"600"}],
+            "display-lg-mobile":["30px",{lineHeight:"38px",letterSpacing:"-0.02em",fontWeight:"700"}],
+            "display-lg":["36px",{lineHeight:"44px",letterSpacing:"-0.02em",fontWeight:"700"}]
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    * { font-family: 'Inter', sans-serif; }
+    .material-symbols-outlined { font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; }
+    .ms-fill { font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24; }
+    ::-webkit-scrollbar { width:4px; height:4px; }
+    ::-webkit-scrollbar-track { background:transparent; }
+    ::-webkit-scrollbar-thumb { background:#c7c4d8; border-radius:4px; }
+    .page-content { animation: fadeIn .25s ease-out; }
+    @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+    #ai-drawer { transition: transform 0.3s cubic-bezier(.4,0,.2,1); }
+    #ai-drawer.open { transform: translateX(0) !important; }
+    @keyframes fade-in { from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:translateY(0)} }
+    .animate-fade-in { animation: fade-in .2s ease-out; }
+    @supports (padding-bottom: env(safe-area-inset-bottom)) { .pb-safe { padding-bottom: env(safe-area-inset-bottom); } }
+  </style>
+</head>
+<body class="bg-background text-on-background antialiased overflow-hidden">
+
+<!-- ========== SIDE NAV (Desktop) ========== -->
+<nav class="hidden md:flex fixed left-0 top-0 h-screen w-[240px] z-50 bg-surface shadow-sm flex-col py-stack-lg px-stack-md border-r border-surface-container-high/50">
+  <div class="flex items-center gap-3 mb-8 px-2 cursor-pointer" data-route="/">
+    <div class="w-10 h-10 rounded-xl bg-primary-container flex items-center justify-center text-on-primary-container shadow-sm">
+      <span class="material-symbols-outlined ms-fill">analytics</span>
+    </div>
+    <div>
+      <h1 class="font-bold text-headline-md text-primary leading-none">Prospera</h1>
+      <p class="text-label-caps text-outline uppercase tracking-wider mt-0.5">Enterprise Analytics</p>
+    </div>
+  </div>
+  <div class="flex-1 overflow-y-auto space-y-1 pr-1">
+    <a class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-label-md cursor-pointer transition-all duration-200 group text-on-surface-variant hover:bg-surface-container" data-route="/" data-page="dashboard"><span class="material-symbols-outlined text-[20px]">dashboard</span><span>Dashboard</span></a>
+    <a class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-label-md cursor-pointer transition-all duration-200 group text-on-surface-variant hover:bg-surface-container" data-route="/analytics" data-page="analytics"><span class="material-symbols-outlined text-[20px]">insights</span><span>Analytics</span></a>
+    <a class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-label-md cursor-pointer transition-all duration-200 group text-on-surface-variant hover:bg-surface-container" data-route="/forecasts" data-page="forecasts"><span class="material-symbols-outlined text-[20px]">query_stats</span><span>Forecasts</span></a>
+    <a class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-label-md cursor-pointer transition-all duration-200 group text-on-surface-variant hover:bg-surface-container" data-route="/inventory" data-page="inventory"><span class="material-symbols-outlined text-[20px]">inventory_2</span><span>Inventory</span></a>
+    <a class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-label-md cursor-pointer transition-all duration-200 group text-on-surface-variant hover:bg-surface-container" data-route="/strategy" data-page="strategy"><span class="material-symbols-outlined text-[20px]">auto_graph</span><span>Strategy</span></a>
+    <a class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-label-md cursor-pointer transition-all duration-200 group text-on-surface-variant hover:bg-surface-container" data-route="/reports" data-page="reports"><span class="material-symbols-outlined text-[20px]">description</span><span>Reports</span></a>
+  </div>
+  <div class="mt-auto pt-stack-md border-t border-surface-container-high/50 space-y-1">
+    <a class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-label-md cursor-pointer transition-all duration-200 group text-on-surface-variant hover:bg-surface-container" data-route="/settings" data-page="settings"><span class="material-symbols-outlined text-[20px]">settings</span><span>Settings</span></a>
+    <div class="flex items-center gap-3 px-3 py-2 mt-2 cursor-pointer hover:bg-surface-container-low rounded-lg transition-colors" onclick="navigate('/settings')">
+      <div class="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-bold text-sm shrink-0">SA</div>
+      <div class="flex-1 min-w-0"><p class="text-label-md text-on-surface truncate font-medium">System Admin</p><p class="text-[10px] text-outline truncate">admin@prospera.io</p></div>
+    </div>
+  </div>
+</nav>
+
+<!-- ========== TOP NAV ========== -->
+<header class="fixed top-0 right-0 left-0 md:left-[240px] h-16 z-40 bg-surface shadow-sm flex justify-between items-center px-6">
+  <div class="flex items-center gap-3 md:hidden">
+    <button id="mobile-menu-btn" class="text-on-surface-variant p-2 rounded-full hover:bg-surface-container-low transition-colors"><span class="material-symbols-outlined">menu</span></button>
+    <div class="font-bold text-headline-md text-primary">Prospera</div>
+  </div>
+  <div class="hidden md:flex items-center flex-1 max-w-md">
+    <div class="relative w-full group">
+      <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline group-focus-within:text-primary transition-colors">search</span>
+      <input id="global-search" class="w-full bg-surface-container-low border border-transparent rounded-lg py-2 pl-10 pr-4 text-on-surface focus:ring-2 focus:ring-primary/30 focus:bg-surface focus:border-primary transition-all text-body-sm outline-none placeholder:text-outline" placeholder="Search inventory, reports, analytics…" type="text"/>
+    </div>
+  </div>
+  <div class="flex items-center gap-2">
+    <button id="notif-btn" class="relative p-2 rounded-full text-on-surface-variant hover:bg-surface-container-low transition-colors">
+      <span class="material-symbols-outlined text-[24px]">notifications</span>
+      <span id="notif-dot" class="absolute top-1.5 right-1.5 w-2 h-2 bg-error rounded-full ring-2 ring-surface"></span>
+    </button>
+    <button id="theme-toggle" class="p-2 rounded-full text-on-surface-variant hover:bg-surface-container-low transition-colors">
+      <span class="material-symbols-outlined text-[24px]" id="theme-icon">light_mode</span>
+    </button>
+    <button id="profile-btn" class="flex items-center gap-2 ml-1 p-1 pr-3 rounded-full hover:bg-surface-container-low transition-colors">
+      <div class="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-bold text-sm">SA</div>
+      <span class="hidden sm:block text-label-md text-on-surface-variant">Admin</span>
+      <span class="material-symbols-outlined text-[16px] text-outline">expand_more</span>
+    </button>
+  </div>
+</header>
+
+<!-- Mobile overlay -->
+<div id="mobile-overlay" class="fixed inset-0 bg-on-surface/30 z-40 hidden md:hidden backdrop-blur-sm" onclick="closeMobileMenu()"></div>
+
+<!-- Mobile sidenav -->
+<nav id="mobile-sidenav" class="fixed left-0 top-0 h-screen w-[260px] z-50 bg-surface shadow-xl flex flex-col py-stack-lg px-stack-md md:hidden transform -translate-x-full transition-transform duration-300">
+  <div class="flex items-center gap-3 mb-8 px-2">
+    <div class="w-10 h-10 rounded-xl bg-primary-container flex items-center justify-center text-on-primary-container shadow-sm"><span class="material-symbols-outlined ms-fill">analytics</span></div>
+    <div><h1 class="font-bold text-headline-md text-primary leading-none">Prospera</h1><p class="text-label-caps text-outline uppercase tracking-wider mt-0.5">Enterprise Analytics</p></div>
+  </div>
+  <div class="flex-1 space-y-1">
+    <a class="mobile-nav-link nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-label-md cursor-pointer transition-all text-on-surface-variant" data-route="/" data-page="dashboard"><span class="material-symbols-outlined text-[20px]">dashboard</span><span>Dashboard</span></a>
+    <a class="mobile-nav-link nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-label-md cursor-pointer transition-all text-on-surface-variant" data-route="/analytics" data-page="analytics"><span class="material-symbols-outlined text-[20px]">insights</span><span>Analytics</span></a>
+    <a class="mobile-nav-link nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-label-md cursor-pointer transition-all text-on-surface-variant" data-route="/forecasts" data-page="forecasts"><span class="material-symbols-outlined text-[20px]">query_stats</span><span>Forecasts</span></a>
+    <a class="mobile-nav-link nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-label-md cursor-pointer transition-all text-on-surface-variant" data-route="/inventory" data-page="inventory"><span class="material-symbols-outlined text-[20px]">inventory_2</span><span>Inventory</span></a>
+    <a class="mobile-nav-link nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-label-md cursor-pointer transition-all text-on-surface-variant" data-route="/strategy" data-page="strategy"><span class="material-symbols-outlined text-[20px]">auto_graph</span><span>Strategy</span></a>
+    <a class="mobile-nav-link nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-label-md cursor-pointer transition-all text-on-surface-variant" data-route="/reports" data-page="reports"><span class="material-symbols-outlined text-[20px]">description</span><span>Reports</span></a>
+    <a class="mobile-nav-link nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-label-md cursor-pointer transition-all text-on-surface-variant" data-route="/settings" data-page="settings"><span class="material-symbols-outlined text-[20px]">settings</span><span>Settings</span></a>
+  </div>
+</nav>
+
+<!-- Mobile bottom nav -->
+<nav class="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-surface shadow-[0_-1px_8px_rgba(0,0,0,0.07)] z-40 flex justify-around items-center px-4 pb-safe border-t border-surface-container-high/50">
+  <a class="mobile-bottom-link flex flex-col items-center justify-center w-full h-full text-on-surface-variant" data-route="/" data-page="dashboard"><span class="material-symbols-outlined text-[22px]">dashboard</span><span class="text-[10px] font-medium mt-0.5">Home</span></a>
+  <a class="mobile-bottom-link flex flex-col items-center justify-center w-full h-full text-on-surface-variant" data-route="/analytics" data-page="analytics"><span class="material-symbols-outlined text-[22px]">insights</span><span class="text-[10px] font-medium mt-0.5">Analytics</span></a>
+  <a class="mobile-bottom-link flex flex-col items-center justify-center w-full h-full text-on-surface-variant" data-route="/inventory" data-page="inventory"><span class="material-symbols-outlined text-[22px]">inventory_2</span><span class="text-[10px] font-medium mt-0.5">Inventory</span></a>
+  <a class="mobile-bottom-link flex flex-col items-center justify-center w-full h-full text-on-surface-variant" data-route="/reports" data-page="reports"><span class="material-symbols-outlined text-[22px]">description</span><span class="text-[10px] font-medium mt-0.5">Reports</span></a>
+</nav>
+
+<!-- ========== MAIN CANVAS ========== -->
+<main id="main-canvas" class="md:ml-[240px] pt-16 pb-20 md:pb-8 min-h-screen overflow-y-auto overflow-x-hidden">
+  <div id="page-container" class="p-4 md:p-8 max-w-7xl mx-auto"></div>
+</main>
+
+<!-- ========== AI FAB ========== -->
+<button id="ai-fab" class="fixed bottom-24 md:bottom-8 right-6 md:right-8 w-14 h-14 bg-primary-container text-on-primary-container rounded-full shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex items-center justify-center z-40 group">
+  <span class="material-symbols-outlined ms-fill text-[28px] group-hover:scale-110 transition-transform duration-300">auto_awesome</span>
+  <span class="absolute right-full mr-3 top-1/2 -translate-y-1/2 bg-inverse-surface text-inverse-on-surface px-3 py-1.5 rounded-lg text-[12px] font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none shadow-lg">AI Copilot</span>
+</button>
+
+<!-- ========== AI COPILOT DRAWER ========== -->
+<aside id="ai-drawer" class="fixed right-0 top-0 h-screen w-full md:w-[400px] z-[60] bg-surface/95 backdrop-blur-xl shadow-2xl flex flex-col py-6 px-6 transform translate-x-full border-l border-outline-variant/20">
+  <div class="flex justify-between items-center mb-6 pb-4 border-b border-surface-container-highest">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-on-primary shadow-sm"><span class="material-symbols-outlined ms-fill text-[20px]">auto_awesome</span></div>
+      <div><h2 class="font-semibold text-title-lg text-primary">AI Copilot</h2><p class="text-label-md text-on-surface-variant">Predictive Insights</p></div>
+    </div>
+    <button id="ai-close" class="w-8 h-8 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container transition-colors"><span class="material-symbols-outlined">close</span></button>
+  </div>
+  <div id="ai-chat-container" class="flex-1 overflow-y-auto pr-1 flex flex-col gap-4">
+    <div class="flex flex-col items-start gap-1 animate-fade-in">
+      <div class="bg-primary/5 border border-primary/20 text-on-surface px-4 py-3 rounded-2xl rounded-tl-sm max-w-[95%] shadow-sm text-body-sm">
+        Hello! I'm your AI Copilot. Ask me about inventory, revenue trends, customers, or forecasts.
+      </div>
+    </div>
+    <div class="flex flex-wrap gap-2">
+      <button class="ai-suggestion bg-surface border border-primary/20 text-primary px-3 py-1.5 rounded-full text-label-md hover:bg-primary/5 transition-colors flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">trending_down</span>Why are sales dropping?</button>
+      <button class="ai-suggestion bg-surface border border-primary/20 text-primary px-3 py-1.5 rounded-full text-label-md hover:bg-primary/5 transition-colors flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">inventory_2</span>Critical stock alerts</button>
+      <button class="ai-suggestion bg-surface border border-primary/20 text-primary px-3 py-1.5 rounded-full text-label-md hover:bg-primary/5 transition-colors flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">lightbulb</span>Optimize Q4 spend</button>
+    </div>
+  </div>
+  <div class="mt-4 bg-surface rounded-xl shadow-sm border border-surface-variant p-2 flex items-end gap-2 focus-within:border-primary focus-within:ring-1 focus-within:ring-primary transition-all">
+    <textarea id="ai-input" class="w-full bg-transparent border-none resize-none focus:ring-0 text-body-sm py-2 max-h-32 overflow-y-auto outline-none placeholder:text-outline" placeholder="Ask AI anything…" rows="1" style="min-height:40px"></textarea>
+    <button id="ai-send" class="p-2 bg-primary text-on-primary rounded-lg hover:bg-surface-tint transition-colors shadow-sm flex-shrink-0"><span class="material-symbols-outlined ms-fill">send</span></button>
+  </div>
+  <div class="flex justify-around border-t border-surface-container-highest pt-4 mt-4">
+    <button class="flex flex-col items-center gap-1 px-4 py-2 text-on-surface-variant hover:text-primary transition-colors rounded-lg hover:bg-surface-container-low"><span class="material-symbols-outlined text-[20px]">history</span><span class="text-[10px] font-bold uppercase tracking-wider">History</span></button>
+    <button class="flex flex-col items-center gap-1 px-4 py-2 text-on-surface-variant hover:text-primary transition-colors rounded-lg hover:bg-surface-container-low" onclick="navigate('/settings')"><span class="material-symbols-outlined text-[20px]">tune</span><span class="text-[10px] font-bold uppercase tracking-wider">Settings</span></button>
+  </div>
+</aside>
+
+<!-- Notification Panel -->
+<div id="notif-panel" class="hidden fixed top-16 right-4 w-80 bg-surface rounded-2xl shadow-2xl border border-surface-container-high z-50 overflow-hidden">
+  <div class="p-4 border-b border-surface-container-high flex justify-between items-center">
+    <h3 class="font-semibold text-title-lg text-on-surface">Notifications</h3>
+    <button onclick="clearNotifications()" class="text-primary text-label-md hover:underline">Mark all read</button>
+  </div>
+  <div class="max-h-96 overflow-y-auto divide-y divide-surface-container-low">
+    <div class="flex gap-3 p-4 hover:bg-surface-container-low transition-colors cursor-pointer"><span class="material-symbols-outlined text-error mt-0.5">warning</span><div><p class="text-body-sm font-medium text-on-surface">Critical stock alert</p><p class="text-body-sm text-on-surface-variant">Quantum Processor Core X9 depletes in 3 days</p><p class="text-[11px] text-outline mt-0.5">2 mins ago</p></div></div>
+    <div class="flex gap-3 p-4 hover:bg-surface-container-low transition-colors cursor-pointer"><span class="material-symbols-outlined text-success mt-0.5">check_circle</span><div><p class="text-body-sm font-medium text-on-surface">Report ready</p><p class="text-body-sm text-on-surface-variant">Q3 Inventory Audit has been generated</p><p class="text-[11px] text-outline mt-0.5">10 mins ago</p></div></div>
+    <div class="flex gap-3 p-4 hover:bg-surface-container-low transition-colors cursor-pointer"><span class="material-symbols-outlined text-warning mt-0.5">api</span><div><p class="text-body-sm font-medium text-on-surface">API Rate Limit</p><p class="text-body-sm text-on-surface-variant">Payment Gateway approaching 85% limit</p><p class="text-[11px] text-outline mt-0.5">5 hours ago</p></div></div>
+  </div>
+</div>
+
+<!-- Profile Dropdown -->
+<div id="profile-dropdown" class="hidden fixed top-16 right-4 w-56 bg-surface rounded-2xl shadow-2xl border border-surface-container-high z-50 overflow-hidden">
+  <div class="p-4 border-b border-surface-container-low"><p class="text-label-md font-semibold text-on-surface">System Admin</p><p class="text-body-sm text-on-surface-variant">admin@prospera.io</p></div>
+  <div class="py-2">
+    <button class="w-full flex items-center gap-3 px-4 py-2.5 text-on-surface hover:bg-surface-container-low transition-colors text-body-sm" onclick="navigate('/settings')"><span class="material-symbols-outlined text-[18px]">manage_accounts</span>Profile Settings</button>
+    <button class="w-full flex items-center gap-3 px-4 py-2.5 text-on-surface hover:bg-surface-container-low transition-colors text-body-sm" onclick="Toast.show('Help & Support coming soon','info')"><span class="material-symbols-outlined text-[18px]">help_outline</span>Help & Support</button>
+    <button class="w-full flex items-center gap-3 px-4 py-2.5 text-error hover:bg-error/5 transition-colors text-body-sm" onclick="Toast.show('Logged out successfully','success');closeDropdowns()"><span class="material-symbols-outlined text-[18px]">logout</span>Sign Out</button>
+  </div>
+</div>
+
+<!-- ========== SCRIPTS ========== -->
+<script src="data.js?v=2"></script>
+<script src="app.js?v=2"></script>
+
+</body>
+</html>
